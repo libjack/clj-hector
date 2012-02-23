@@ -185,7 +185,7 @@
   [ks cf pks scs & o]
   (let [opts (extract-options o cf)]
     (execute-query (doto (HFactory/createMultigetSuperSliceQuery ks
-                                                                 (s/serializer (first pks))
+                                                                 (s/serializer (or (:k-serializer opts) (first pks)))
                                                                  (s/serializer (:s-serializer opts))
                                                                  (s/serializer (:n-serializer opts))
                                                                  (s/serializer (:v-serializer opts)))
@@ -200,7 +200,7 @@
   [ks cf pks & o]
   (let [opts (extract-options o cf)]
     (execute-query (doto (HFactory/createMultigetSliceQuery ks
-                                                            (s/serializer (first pks))
+                                                            (s/serializer (or (:k-serializer opts) (first pks)))
                                                             (s/serializer (:n-serializer opts))
                                                             (s/serializer (:v-serializer opts)))
                      (.setColumnFamily cf)

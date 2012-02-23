@@ -69,6 +69,12 @@
   [f & args]
   (fn [& more] (apply f (concat more args))))
 
+(defn- getKey
+  "assures that key is clojure type"
+  [s opts]
+  (let [key (.getKey s)]
+    (if (instance? AbstractComposite key) (to-clojure key opts) key)))
+
 (extend-protocol ToClojure
   ColumnDefinition
   (to-clojure [c _] {:name (.getName c)
@@ -93,13 +99,13 @@
     (into (sorted-map) (partial> to-clojure opts) (iterator-seq (.iterator s))))
   CounterRowImpl
   (to-clojure [s opts]
-    {(.getKey s) (to-clojure (.getColumnSlice s) opts)})
+    {(getKey s opts) (to-clojure (.getColumnSlice s) opts)})
   SuperRowsImpl
   (to-clojure [s opts]
     (map (partial> to-clojure opts) (iterator-seq (.iterator s))))
   SuperRowImpl
   (to-clojure [s opts]
-    {(.getKey s) (map (partial> to-clojure opts) (seq (.. s getSuperSlice getSuperColumns)))})
+    {(getKey s opts) (map (partial> to-clojure opts) (seq (.. s getSuperSlice getSuperColumns)))})
   HSuperColumnImpl
   (to-clojure [s opts]
     {(.getName s) (into (sorted-map) (map (partial> to-clojure opts) (.getColumns s)))})
@@ -108,7 +114,7 @@
     (map (partial> to-clojure opts) (iterator-seq (.iterator s))))
   RowImpl
   (to-clojure [s opts]
-    {(.getKey s) (to-clojure (.getColumnSlice s) opts)})
+    {(getKey s opts) (to-clojure (.getColumnSlice s) opts)})
   ColumnSliceImpl
   (to-clojure [s opts]
     (into (sorted-map) (for [c (.getColumns s)] (to-clojure c opts))))
